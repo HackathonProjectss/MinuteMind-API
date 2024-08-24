@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "FastAPI"
     BASE_URL: str = config('BASE_URL', cast=str)
     WATSONX_API_KEY: str = config('WATSONX_API_KEY', cast=str)
+    OPENAI_API_KEY: str = config('OPENAI_API_KEY', cast=str)
+    WATSONX_BASE_URL: str = config('WATSONX_BASE_URL', cast=str)
+    WATSONX_VERSION: str = config('WATSONX_VERSION', cast=str)
+    WATSONX_PROJECT_ID: str = config('WATSONX_PROJECT_ID', cast=str)    
     class Config:
         case_sensitive = True
     

@@ -5,3 +5,4 @@ python-decouple==3.8
 starlette==0.38.2
 uvicorn==0.30.6
 python-multipart==0.0.9
+openai==1.42.0
