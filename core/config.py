@@ -4,7 +4,6 @@ from pydantic import AnyHttpUrl
 from core.logger import logger
 from decouple import config
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
     PROJECT_NAME: str = "FastAPI"
     BASE_URL: str = config('BASE_URL', cast=str)
