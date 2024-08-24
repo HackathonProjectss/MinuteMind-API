@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.logger import logger
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import List
 from services.watsonx import Watsonx
 import json
@@ -21,7 +21,7 @@ allowed_origins = [
 # Define the Pydantic model for the user information
 class User(BaseModel):
     name: str    
-    email: EmailStr
+    email: str
 
 # Define the Pydantic model for the request payload
 class SummarizeRequest(BaseModel):
@@ -56,10 +56,10 @@ async def summarize_content(
     #TODO: Implement the audio processing logic
     #TODO: Send transcribed text to WatsonX API for summarization
     #TODO: Return the summarized text to the client
-    watonx = Watsonx(settings.WATSONX_API_KEY, settings.BASE_URL, "2021-08-01")
-    watonx.summarize_text("This is a test text")
-    watonx.generate_action_items("This is a test text", parsed_users)
-    watonx.generate_emails("This is a test text", parsed_users)
+    watsonx = Watsonx(settings.WATSONX_API_KEY, settings.BASE_URL, "2021-08-01")
+    watsonx.summarize_text("This is a test text")
+    watsonx.generate_action_items("This is a test text", parsed_users)
+    watsonx.generate_emails("This is a test text", parsed_users)
     watsonx.parse_audio(audio)
     # Process the team name, users, and audio file as needed
     return {"message": "Processing complete", "team_name": team_name, "users": parsed_users}
