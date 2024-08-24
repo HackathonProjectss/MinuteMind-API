@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.logger import logger
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import List
 from services.watsonx import Watsonx
 import json
@@ -21,7 +21,7 @@ allowed_origins = [
 # Define the Pydantic model for the user information
 class User(BaseModel):
     name: str    
-    email: EmailStr
+    email: str
 
 # Define the Pydantic model for the request payload
 class SummarizeRequest(BaseModel):
@@ -37,7 +37,9 @@ async def exception_handler(request: Request, exc: Exception):
         content={"message": "An internal server error occurred"},
     )
 
-
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting up the MinuteMind API")
 
 @app.get("/")
 async def read_root():
@@ -49,20 +51,40 @@ async def summarize_content(
     users: str = Form(...),
     audio: UploadFile = File(...)
 ):
-    # Parse the JSON string into a list of User objects
-    users_list = json.loads(users)
-    parsed_users = [User(**user) for user in users_list]
+    # # Parse the JSON string into a list of User objects
+    # users_list = json.loads(users)
+    # parsed_users = [User(**user) for user in users_list]
 
-    #TODO: Implement the audio processing logic
-    #TODO: Send transcribed text to WatsonX API for summarization
-    #TODO: Return the summarized text to the client
-    watonx = Watsonx(settings.WATSONX_API_KEY, settings.BASE_URL, "2021-08-01")
-    watonx.summarize_text("This is a test text")
-    watonx.generate_action_items("This is a test text", parsed_users)
-    watonx.generate_emails("This is a test text", parsed_users)
-    watsonx.parse_audio(audio)
+    # #TODO: Implement the audio processing logic
+    # #TODO: Send transcribed text to WatsonX API for summarization
+    # #TODO: Return the summarized text to the client
+    # watsonx = Watsonx(settings.WATSONX_API_KEY, settings.BASE_URL, "2021-08-01")
+    # watsonx.summarize_text("This is a test text")
+    # watsonx.generate_action_items("This is a test text", parsed_users)
+    # watsonx.generate_emails("This is a test text", parsed_users)
+    # watsonx.parse_audio(audio)
     # Process the team name, users, and audio file as needed
-    return {"message": "Processing complete", "team_name": team_name, "users": parsed_users}
+    return {
+    "team_name": "Team Alpha",
+    "summary": "The meeting discussed project deadlines and assigned tasks for the upcoming sprint. Key points included finalizing the design, improving code quality, and ensuring timely delivery.",
+    "action_items": [
+        {
+        "user": {
+            "name": "John Doe",
+            "email": "johndoe@example.com"
+        },
+        "tasks": "- [ ] **Finalize the design of the homepage** by *August 31, 2024*\n- [ ] **Review code quality and provide feedback** by *August 28, 2024*"
+        },
+        {
+        "user": {
+            "name": "Jane Smith",
+            "email": "janesmith@example.com"
+        },
+        "tasks": "- [ ] **Prepare the presentation** for the next client meeting by *September 2, 2024*\n- [ ] **Coordinate with the marketing team** by *August 30, 2024*"
+        }
+    ]
+    }
+
 
 
 # Add CORSMiddleware to the application
