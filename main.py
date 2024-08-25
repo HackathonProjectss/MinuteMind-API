@@ -17,7 +17,8 @@ app = FastAPI(
 )
 allowed_origins = [
     "http://localhost:3000", 
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "https://minute-mind-ui.vercel.app"
 ]
 
 # Define the Pydantic model for the user information
