@@ -17,6 +17,7 @@ app = FastAPI(
 )
 allowed_origins = [
     "http://localhost:3000", 
+    "http://localhost:5173"
 ]
 
 # Define the Pydantic model for the user information
@@ -27,7 +28,7 @@ class User(BaseModel):
 
 # Define the Pydantic model for the request payload
 class SummarizeRequest(BaseModel):
-    team_name: str
+    title: str
     users: List[User]
 
 
@@ -50,25 +51,31 @@ async def read_root():
 
 @app.post("/api/summarize")
 async def summarize_content(
-    team_info: str = Form(...),  # Accepting as a string
+    meeting_info: str = Form(...),  # Accepting as a string
     audio: UploadFile = File(...)
 ):
     # Parse the JSON string into a dictionary
     try:
-        team_info_dict = json.loads(team_info)
+        team_info_dict = json.loads(meeting_info)
         team_info_model = SummarizeRequest(**team_info_dict)
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=400, detail="Invalid JSON format") from e
     # Parse the audio file
+    users = team_info_model.users
+    # //conver to dic 
+    # users = [user.model_dump() for user in users]
     tanscribed_text = await parse_audio(audio)
     try:
-        token = authenticate_watsonx(settings.WATSONX_API_KEY)
+        token = await authenticate_watsonx(settings.WATSONX_API_KEY)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to authenticate with WatsonX") from e
-    
     watsonx = Watsonx(token, settings.WATSONX_BASE_URL, settings.WATSONX_VERSION, settings.WATSONX_PROJECT_ID,)
-    summary = watsonx.summarize_text(tanscribed_text, "meta-llama/llama-3-1-70b-instruct")
-    action_items = watsonx.generate_action_items(tanscribed_text, team_info_model.users, "meta-llama/llama-3-1-70b-instruct")
+    summary = await watsonx.summarize_text(tanscribed_text, "meta-llama/llama-3-1-70b-instruct")
+    action_items = await watsonx.generate_action_items(tanscribed_text, team_info_model.users, "meta-llama/llama-3-1-70b-instruct")
+    print({
+        "summary": summary,
+        "action_items": action_items
+    })
 
     return {"summary": summary, "action_items": action_items}
 

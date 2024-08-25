@@ -91,21 +91,21 @@ class Watsonx:
             logger.error(f"Request failed: {re}")
             raise Exception(f"An error occurred while communicating with the WatsonX API: {re}") from re
 
-    def summarize_text(self, text, model):
+    async def summarize_text(self, text, model):
         content = f"Summarize Meeting\n\nInput: {text}\n\nOutput:"
         return self.text_generation(input_text=content, model_id=model)
     
-    def generate_action_items(self, text, users, model):
+    async def generate_action_items(self, text, users, model):
         results = []
         for user in users:
             try:
                 prompt = f"Generate a list of action items for the person mentioned below. Each action item should be a specific task and presented in markdown format as a checklist. Ensure that the tasks are clear, actionable, and relevant to the person's role or responsibilities. Person: {user.name}\n\n{text}"
                 # this should be an async function
                 action_items = self.text_generation(input_text=prompt, model_id=model)
-                results.append({"user": user, "action_items": action_items})
+                results.append({"user": user.model_dump(), "action_items": action_items})
             except Exception as e:
                 logger.debug(f"Failed to generate action items for {user.name}: {e}")
-                results.append({"user": user, "action_items": "None", "error": str(e)})   
+                results.append({"user": user.model_dump(), "action_items": "None", "error": str(e)})   
         return results
     
 
@@ -113,7 +113,7 @@ class Watsonx:
         logger.info("Generating emails")
         return "This is a list of emails"
 
-def authenticate_watsonx(api_key):
+async def authenticate_watsonx(api_key):
     """
     Authenticate with IBM Watson using an API key.
     """
