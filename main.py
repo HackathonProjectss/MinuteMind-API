@@ -65,14 +65,22 @@ async def summarize_content(
     users = team_info_model.users
     # //conver to dic 
     # users = [user.model_dump() for user in users]
+    print("Transcribing audio...")
     tanscribed_text = await parse_audio(audio)
+    print("Finished transcribing audio")
+    print("Authenticating with WatsonX...")
     try:
         token = await authenticate_watsonx(settings.WATSONX_API_KEY)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to authenticate with WatsonX") from e
+    print("Authenticated with WatsonX")
     watsonx = Watsonx(token, settings.WATSONX_BASE_URL, settings.WATSONX_VERSION, settings.WATSONX_PROJECT_ID,)
+    print("Summarizing text...")
     summary = await watsonx.summarize_text(tanscribed_text, "meta-llama/llama-3-1-70b-instruct")
+    print("Finished summarizing text")
+    print("Generating action items...")
     action_items = await watsonx.generate_action_items(tanscribed_text, team_info_model.users, "meta-llama/llama-3-1-70b-instruct")
+    print("Finished generating action items")
     print({
         "summary": summary,
         "action_items": action_items
